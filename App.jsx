@@ -6,6 +6,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 
 import AdmScreen from "./screens/AdmScreen";
+import ReceiveTicket from "./screens/ReceiveTicket";
 
 const Drawer = createDrawerNavigator();
 
@@ -15,6 +16,15 @@ function DrawerNavigator() {
       <Drawer.Screen
         name="Adiministrador"
         component={AdmScreen}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Receber Ticket"
+        component={ReceiveTicket}
         options={{
           drawerIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
