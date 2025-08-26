@@ -1,35 +1,24 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { NavigationContainer } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 
 import AdmScreen from "./screens/AdmScreen";
 import LoginScreen from "./screens/LoginScreen";
+import LoginAluno from "./screens/LoginAluno";
 
-const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 
 function DrawerNavigator() {
   return (
-    <Drawer.Navigator>
+    <Drawer.Navigator initialRouteName="Administrador">
       <Drawer.Screen
-        name="Adiministrador"
+        name="Administrador"
         component={AdmScreen}
         options={{
           drawerIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
-          ),
-        }}
-      />
-
-      <Drawer.Screen
-        name="Login"
-        component={LoginScreen}
-        options={{
-          drawerIcon: ({ color, size }) => (
-            <Ionicons name="people" size={size} color={color} />
           ),
         }}
       />
@@ -39,9 +28,18 @@ function DrawerNavigator() {
 
 function StackNavigator() {
   return (
-    <Stack.Navigator>
-      <Stack.Screen name="Login" component={LoginAluno} />
-      <Stack.Screen name="Login-Adm" component={LoginAdm} />
+    <Stack.Navigator initialRouteName="Login">
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ headerShown: false, headerTitle: "", headerBackTitleVisible: false }}
+      />
+      <Stack.Screen
+        name="LoginAluno"
+        component={LoginAluno}
+        options={{ headerShown: true, headerTitle: "" }}
+      />
+      <Stack.Screen name="Home" component={DrawerNavigator} />
     </Stack.Navigator>
   );
 }
@@ -49,7 +47,7 @@ function StackNavigator() {
 export default function App() {
   return (
     <NavigationContainer>
-      <DrawerNavigator />
+      <StackNavigator />
     </NavigationContainer>
   );
 }
