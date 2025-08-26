@@ -11,6 +11,7 @@
   "dependencies": {
     "@react-native-vector-icons/ionicons": "^12.3.0",
     "@react-navigation/drawer": "^7.5.7",
+    "@react-navigation/stack": "^7.4.7",
     "expo": "~53.0.22",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",

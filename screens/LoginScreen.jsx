@@ -5,11 +5,21 @@ export default function LoginScreen({ navigation }) {
     <View style={styles.container}>
       <Text style={styles.title}>Você é</Text>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          navigation.navigate("LoginAluno");
+        }}
+      >
         <Text style={styles.option}>Aluno</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          navigation.navigate("LoginAdmin");
+        }}
+      >
         <Text style={styles.option}>Admin</Text>
       </TouchableOpacity>
     </View>
