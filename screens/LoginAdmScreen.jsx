@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 export default function LoginAdmin() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const navigation = useNavigation();
 
   const handleLogin = () => {
     if (email.trim() === "" || senha.trim() === "") {
@@ -11,8 +13,11 @@ export default function LoginAdmin() {
       return;
     }
 
-    // Lógica de autenticação real entraria aqui
-    Alert.alert("Sucesso", `Bem-vindo, admin!`);
+    if (email === "adm@gg" && senha === "123") {
+      navigation.navigate("Home");
+    } else {
+      Alert.alert("Erro", "Email ou senha incorretos.");
+    }
   };
 
   return (

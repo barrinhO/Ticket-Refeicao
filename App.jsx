@@ -60,7 +60,11 @@ function StackNavigator() {
         component={LoginAdminScreen}
         options={{ headerShown: true, headerTitle: "" }}
       />
-      <Stack.Screen name="Home" component={DrawerNavigator} />
+      <Stack.Screen
+        name="Home"
+        component={DrawerNavigator}
+        options={{ headerShown: false, headerTitle: "", headerBackTitleVisible: false }}
+      />
     </Stack.Navigator>
   );
 }
