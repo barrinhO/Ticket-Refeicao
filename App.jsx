@@ -1,6 +1,5 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
-
 import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
@@ -41,8 +40,8 @@ function DrawerNavigator() {
 function StackNavigator() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="LoginAluno" component={AdmScreen} />
-      <Stack.Screen name="LoginAdmin" component={teste} />
+      <Stack.Screen name="Login" component={LoginAluno} />
+      <Stack.Screen name="Login-Adm" component={LoginAdm} />
     </Stack.Navigator>
   );
 }
