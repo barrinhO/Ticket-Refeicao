@@ -1,20 +1,34 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 
-export default function App() {
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import { NavigationContainer } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+
+import AdmScreen from "./screens/AdmScreen";
+
+const Drawer = createDrawerNavigator();
+
+function DrawerNavigator() {
   return (
-    <View style={styles.container}>
-      <Text>Hellooooooooo</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Drawer.Navigator>
+      <Drawer.Screen
+        name="Adm"
+        component={AdmScreen}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+        }}
+      />
+    </Drawer.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+export default function App() {
+  return (
+    <NavigationContainer>
+      <DrawerNavigator />
+    </NavigationContainer>
+  );
+}
