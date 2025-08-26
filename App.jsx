@@ -4,6 +4,7 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
 
 import AdmScreen from "./screens/AdmScreen";
+import ReceiveTicket from "./screens/ReceiveTicket";
 import LoginScreen from "./screens/LoginScreen";
 import LoginAlunoScreen from "./screens/LoginAlunoScreen";
 import LoginAdminScreen from "./screens/LoginAdmScreen";
@@ -23,6 +24,15 @@ function DrawerNavigator() {
           ),
         }}
       />
+      <Drawer.Screen
+        name="Receber Ticket"
+        component={ReceiveTicket}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+        }}
+      />
     </Drawer.Navigator>
   );
 }
@@ -33,7 +43,11 @@ function StackNavigator() {
       <Stack.Screen
         name="Login"
         component={LoginScreen}
-        options={{ headerShown: false, headerTitle: "", headerBackTitleVisible: false }}
+        options={{
+          headerShown: false,
+          headerTitle: "",
+          headerBackTitleVisible: false,
+        }}
       />
       <Stack.Screen
         name="LoginAluno"
