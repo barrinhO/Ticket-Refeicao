@@ -3,8 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 export default function AdmScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Administrador</Text>
-
       {/* botões */}
 
       <TouchableOpacity>

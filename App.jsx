@@ -13,7 +13,7 @@ function DrawerNavigator() {
   return (
     <Drawer.Navigator>
       <Drawer.Screen
-        name="Adm"
+        name="Adiministrador"
         component={AdmScreen}
         options={{
           drawerIcon: ({ color, size }) => (
