@@ -5,7 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 
 import AdmScreen from "./screens/AdmScreen";
 import LoginScreen from "./screens/LoginScreen";
-import LoginAluno from "./screens/LoginAluno";
+import LoginAlunoScreen from "./screens/LoginAlunoScreen";
+import LoginAdminScreen from "./screens/LoginAdmScreen";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -36,7 +37,13 @@ function StackNavigator() {
       />
       <Stack.Screen
         name="LoginAluno"
-        component={LoginAluno}
+        component={LoginAlunoScreen}
+        options={{ headerShown: true, headerTitle: "" }}
+      />
+
+      <Stack.Screen
+        name="LoginAdmin"
+        component={LoginAdminScreen}
         options={{ headerShown: true, headerTitle: "" }}
       />
       <Stack.Screen name="Home" component={DrawerNavigator} />
