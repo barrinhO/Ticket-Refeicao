@@ -8,6 +8,7 @@ import ReceiveTicket from "./screens/ReceiveTicket";
 import LoginScreen from "./screens/LoginScreen";
 import LoginAlunoScreen from "./screens/LoginAlunoScreen";
 import LoginAdminScreen from "./screens/LoginAdmScreen";
+import CadastroAluno from "./screens/CadastroAlunoScreen";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -27,6 +28,16 @@ function DrawerNavigator() {
       <Drawer.Screen
         name="Receber Ticket"
         component={ReceiveTicket}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="CadastrarAluno"
+        component={CadastroAluno}
         options={{
           drawerIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
@@ -63,7 +74,11 @@ function StackNavigator() {
       <Stack.Screen
         name="Home"
         component={DrawerNavigator}
-        options={{ headerShown: false, headerTitle: "", headerBackTitleVisible: false }}
+        options={{
+          headerShown: false,
+          headerTitle: "",
+          headerBackTitleVisible: false,
+        }}
       />
     </Stack.Navigator>
   );
