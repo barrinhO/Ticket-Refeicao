@@ -1,11 +1,14 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
-export default function AdmScreen() {
+export default function AdmScreen({ navigation }) {
   return (
     <View style={styles.container}>
       {/* botões */}
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("CadastrarAluno")}
+      >
         <Text style={styles.buttonText}>Cadastrar alunos</Text>
       </TouchableOpacity>
 

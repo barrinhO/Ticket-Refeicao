@@ -1,12 +1,17 @@
 import {
   View,
   Text,
-  TouchableOpacity,
+  TouchableOpSacity,
   TextInput,
   StyleSheet,
   Alert,
+  TouchableOpacity,
 } from "react-native";
-import React, { useState } from "react";
+import { useState } from "react";
+
+const randomCode = (min, max) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
 
 export default function CadastroAluno() {
   const [nome, setNome] = useState("");
@@ -16,7 +21,11 @@ export default function CadastroAluno() {
       Alert.alert("Erro", "Por favor, digite o nome do aluno.");
       return;
     }
-    Alert.alert("Sucesso", `Aluno ${nome} cadastrado!`);
+    Alert.alert(
+      "Sucesso",
+      `Aluno(a) ${nome} cadastrado(a)!\n\nCódigo: ${randomCode(100000, 999999)}`
+    );
+
     setNome("");
   };
 
@@ -33,7 +42,7 @@ export default function CadastroAluno() {
       />
 
       <TouchableOpacity style={styles.button} onPress={handleCadastro}>
-        <Text style={styles.buttonText}>Cadastrar</Text>
+        <Text style={styles.buttonText}>Cadastrar e gerar código</Text>
       </TouchableOpacity>
     </View>
   );

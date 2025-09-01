@@ -34,23 +34,13 @@ function DrawerNavigator() {
           ),
         }}
       />
-
-      <Drawer.Screen
-        name="CadastrarAluno"
-        component={CadastroAluno}
-        options={{
-          drawerIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
-        }}
-      />
     </Drawer.Navigator>
   );
 }
 
 function StackNavigator() {
   return (
-    <Stack.Navigator initialRouteName="Login">
+    <Stack.Navigator initialRouteName="Home">
       <Stack.Screen
         name="Login"
         component={LoginScreen}
@@ -71,6 +61,13 @@ function StackNavigator() {
         component={LoginAdminScreen}
         options={{ headerShown: true, headerTitle: "" }}
       />
+
+      <Stack.Screen
+        name="CadastrarAluno"
+        component={CadastroAluno}
+        options={{ headerShown: true, headerTitle: "" }}
+      />
+
       <Stack.Screen
         name="Home"
         component={DrawerNavigator}
