@@ -15,6 +15,11 @@ const CANTINA_COORDS = {
 };
 const MAX_DISTANCE_METERS = 50;
 
+const TICKET_START_HOUR = 14;
+const TICKET_START_MINUTE = 55;
+const TICKET_END_HOUR = 19;
+const TICKET_END_MINUTE = 7;
+
 function haversineDistance(coords1, coords2) {
   const toRad = (x) => (x * Math.PI) / 180;
   const R = 6371e3;
@@ -31,6 +36,15 @@ function haversineDistance(coords1, coords2) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
   return R * c;
+}
+
+function isWithinTicketTime(date) {
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+  const start = TICKET_START_HOUR * 60 + TICKET_START_MINUTE;
+  const end = TICKET_END_HOUR * 60 + TICKET_END_MINUTE;
+  const now = hour * 60 + minute;
+  return now >= start && now <= end;
 }
 
 const TelaRecebimentoTicket = () => {
@@ -101,7 +115,7 @@ const TelaRecebimentoTicket = () => {
       case "disponivel":
         return (
           <Text style={styles.statusTextDisponivel}>
-            Status: Ticket Disponível ✅
+            Status: Ticket Resgatado! ✅
           </Text>
         );
       case "usado":
@@ -147,14 +161,23 @@ const TelaRecebimentoTicket = () => {
           )}
         </View>
 
-        {isLocationVerified && ticketStatus === "nao_recebido" && (
-          <TouchableOpacity
-            style={styles.ticketButton}
-            onPress={handleReceiveTicket}
-          >
-            <Text style={styles.buttonText}>Resgatar Ticket</Text>
-          </TouchableOpacity>
-        )}
+        {isLocationVerified &&
+          ticketStatus === "nao_recebido" &&
+          isWithinTicketTime(currentTime) && (
+            <TouchableOpacity
+              style={styles.ticketButton}
+              onPress={handleReceiveTicket}
+            >
+              <Text style={styles.buttonText}>Resgatar Ticket</Text>
+            </TouchableOpacity>
+          )}
+
+        {!isWithinTicketTime(currentTime) &&
+          ticketStatus === "nao_recebido" && (
+            <Text style={styles.infoText}>
+              O ticket só pode ser resgatado entre 14:55 e 15:05.
+            </Text>
+          )}
 
         {ticketStatus !== "nao_recebido" && (
           <Text style={styles.infoText}>
@@ -214,7 +237,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   statusTextPendente: { fontSize: 18, fontWeight: "bold", color: "#E74C3C" },
-  statusTextDisponivel: { fontSize: 18, fontWeight: "bold", color: "#2ECC71" },
+  statusTextDisponivel: { fontSize: 18, fontWeight: "bold", color: "#014f03" },
   statusTextUsado: { fontSize: 18, fontWeight: "bold", color: "#95A5A6" },
   actionSection: {
     width: "90%",
