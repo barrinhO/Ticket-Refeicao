@@ -62,8 +62,9 @@ const TelaRecebimentoTicket = () => {
   }, []);
 
   useEffect(() => {
-    const verifyLocation = async () => {
-      setIsLoadingLocation(true);
+    let locationSubscription;
+
+    const startWatchingLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         setLocationMessage("Permissão de localização negada.");
@@ -72,35 +73,47 @@ const TelaRecebimentoTicket = () => {
       }
 
       try {
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.BestForNavigation,
-        });
-        const userCoords = {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        };
-        const distance = haversineDistance(userCoords, CANTINA_COORDS);
+        locationSubscription = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.BestForNavigation,
+            timeInterval: 5000, // Atualiza a cada 5 segundos
+            distanceInterval: 10, // Atualiza a cada 10 metros
+          },
+          (location) => {
+            const userCoords = {
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            };
+            const distance = haversineDistance(userCoords, CANTINA_COORDS);
 
-        if (distance <= MAX_DISTANCE_METERS) {
-          setIsLocationVerified(true);
-          setLocationMessage("Você está na cantina!");
-        } else {
-          setIsLocationVerified(false);
-          setLocationMessage(
-            `Você não está na cantina. Aproxime-se para resgatar.`
-          );
-        }
+            if (distance <= MAX_DISTANCE_METERS) {
+              setIsLocationVerified(true);
+              setLocationMessage("Você está na cantina!");
+            } else {
+              setIsLocationVerified(false);
+              setLocationMessage(
+                `Você não está na cantina. Aproxime-se para resgatar.`
+              );
+            }
+            setIsLoadingLocation(false);
+          }
+        );
       } catch (error) {
         setIsLocationVerified(false);
         setLocationMessage(
           "Não foi possível obter a localização. Verifique seu GPS."
         );
-      } finally {
         setIsLoadingLocation(false);
       }
     };
 
-    verifyLocation();
+    startWatchingLocation();
+
+    return () => {
+      if (locationSubscription) {
+        locationSubscription.remove();
+      }
+    };
   }, []);
 
   const handleReceiveTicket = () => {
@@ -143,23 +156,25 @@ const TelaRecebimentoTicket = () => {
       <View style={styles.statusBox}>{renderTicketStatus()}</View>
 
       <View style={styles.actionSection}>
-        <View style={styles.locationIndicator}>
-          {isLoadingLocation ? (
-            <ActivityIndicator size="small" color="#555" />
-          ) : (
-            <Text
-              style={[
-                styles.locationText,
-                isLocationVerified
-                  ? styles.locationTextSuccess
-                  : styles.locationTextError,
-              ]}
-            >
-              {isLocationVerified ? "📍 " : "🚫 "}
-              {locationMessage}
-            </Text>
-          )}
-        </View>
+        {ticketStatus === "nao_recebido" && (
+          <View style={styles.locationIndicator}>
+            {isLoadingLocation ? (
+              <ActivityIndicator size="small" color="#555" />
+            ) : (
+              <Text
+                style={[
+                  styles.locationText,
+                  isLocationVerified
+                    ? styles.locationTextSuccess
+                    : styles.locationTextError,
+                ]}
+              >
+                {isLocationVerified ? "📍 " : "🚫 "}
+                {locationMessage}
+              </Text>
+            )}
+          </View>
+        )}
 
         {isLocationVerified &&
           ticketStatus === "nao_recebido" &&
