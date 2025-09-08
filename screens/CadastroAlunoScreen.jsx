@@ -9,8 +9,14 @@ import {
 } from "react-native";
 import { useState } from "react";
 
-const randomCode = (min, max) => {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+const randomCode = () => {
+  const randomNumbers = Math.floor(Math.random() * 90 + 10);
+  const specialChars = ["#", "@", "$", "&", "*", "!"];
+  const randomSpecialChar =
+    specialChars[Math.floor(Math.random() * specialChars.length)];
+  const randomLetter = String.fromCharCode(Math.floor(Math.random() * 26) + 65);
+
+  return `${randomNumbers}${randomSpecialChar}${randomLetter}`;
 };
 
 export default function CadastroAluno() {
@@ -23,7 +29,7 @@ export default function CadastroAluno() {
     }
     Alert.alert(
       "Sucesso",
-      `Aluno(a) ${nome} cadastrado(a)!\n\nCódigo: ${randomCode(100000, 999999)}`
+      `Aluno(a) ${nome} cadastrado(a)!\n\nCódigo: ${randomCode()}`
     );
 
     setNome("");

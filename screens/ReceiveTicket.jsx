@@ -17,8 +17,8 @@ const MAX_DISTANCE_METERS = 50;
 
 const TICKET_START_HOUR = 14;
 const TICKET_START_MINUTE = 55;
-const TICKET_END_HOUR = 19;
-const TICKET_END_MINUTE = 7;
+const TICKET_END_HOUR = 15;
+const TICKET_END_MINUTE = 5;
 
 function haversineDistance(coords1, coords2) {
   const toRad = (x) => (x * Math.PI) / 180;
