@@ -76,8 +76,8 @@ const TelaRecebimentoTicket = () => {
         locationSubscription = await Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.BestForNavigation,
-            timeInterval: 5000, // Atualiza a cada 5 segundos
-            distanceInterval: 10, // Atualiza a cada 10 metros
+            timeInterval: 5000,
+            distanceInterval: 10,
           },
           (location) => {
             const userCoords = {

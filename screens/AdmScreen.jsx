@@ -12,7 +12,10 @@ export default function AdmScreen({ navigation }) {
         <Text style={styles.buttonText}>Cadastrar alunos</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("ViewTicket")}
+      >
         <Text style={styles.buttonText}>Visualizar tickets utilizados</Text>
       </TouchableOpacity>
 
