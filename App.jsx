@@ -9,6 +9,7 @@ import LoginScreen from "./screens/LoginScreen";
 import LoginAlunoScreen from "./screens/LoginAlunoScreen";
 import LoginAdminScreen from "./screens/LoginAdmScreen";
 import CadastroAluno from "./screens/CadastroAlunoScreen";
+import TicketsUsados from "./screens/ViewTicket";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -40,7 +41,7 @@ function DrawerNavigator() {
 
 function StackNavigator() {
   return (
-    <Stack.Navigator initialRouteName="Login">
+    <Stack.Navigator initialRouteName="Home">
       <Stack.Screen
         name="Login"
         component={LoginScreen}
@@ -53,6 +54,12 @@ function StackNavigator() {
       <Stack.Screen
         name="LoginAluno"
         component={LoginAlunoScreen}
+        options={{ headerShown: true, headerTitle: "" }}
+      />
+
+      <Stack.Screen
+        name="ViewTicket"
+        component={TicketsUsados}
         options={{ headerShown: true, headerTitle: "" }}
       />
 
