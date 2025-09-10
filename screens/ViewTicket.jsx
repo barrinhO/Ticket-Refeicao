@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,36 +6,32 @@ import {
   FlatList,
   SafeAreaView,
   TouchableOpacity,
+  Alert,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const UsedTicketsScreen = () => {
-  const [allTickets, setAllTickets] = useState([
-    {
-      id: "1",
-      name: "João Vitor",
-      used: true,
-      date: "25/09/2025",
-      time: "15:00",
-    },
-    {
-      id: "2",
-      name: "Maria Silva",
-      used: true,
-      date: "25/09/2025",
-      time: "15:02",
-    },
-    { id: "16", name: "Ricardo Dias", used: false, date: null, time: null },
-  ]);
-
+  const [allTickets, setAllTickets] = useState([]);
   const [filter, setFilter] = useState("used");
 
-  const filteredTickets = allTickets.filter((ticket) => {
-    if (filter === "used") {
-      return ticket.used;
-    } else {
-      return !ticket.used;
-    }
-  });
+  useEffect(() => {
+    const loadTickets = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem("alunos");
+        if (storedData) {
+          setAllTickets(JSON.parse(storedData));
+        }
+      } catch (error) {
+        console.log("Erro ao carregar alunos:", error);
+      }
+    };
+
+    loadTickets();
+  }, []);
+
+  const filteredTickets = allTickets.filter((ticket) =>
+    filter === "used" ? ticket.used : !ticket.used,
+  );
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
@@ -47,36 +43,63 @@ const UsedTicketsScreen = () => {
       )}
       {item.used && (
         <Text style={styles.dateInfo}>
-          <Text style={styles.label}>Resgatado em:</Text> {item.date}{" "}
-          {item.time}
+          <Text style={styles.label}>Resgatado em:</Text> {item.date} {item.time}
         </Text>
       )}
+
+      <TouchableOpacity style={styles.deleteButton} onPress={() => confirmarExclusao(item.id)}>
+        <Text style={styles.deleteButtonText}>Excluir</Text>
+      </TouchableOpacity>
     </View>
   );
+
+  const deleteTicket = async (id) => {
+    try {
+      const storedData = await AsyncStorage.getItem("alunos");
+      if (!storedData) return;
+
+      let alunos = JSON.parse(storedData);
+
+      const updatedAlunos = alunos.filter((aluno) => aluno.id !== id);
+
+      await AsyncStorage.setItem("alunos", JSON.stringify(updatedAlunos));
+
+      setAllTickets(updatedAlunos);
+    } catch (error) {
+      console.log("Erro ao excluir aluno:", error);
+    }
+  };
+
+  const confirmarExclusao = (id) => {
+    Alert.alert("Excluir Ticket", "Deseja realmente excluir este ticket?", [
+      { text: "Não", style: "cancel" },
+      {
+        text: "Sim",
+        onPress: () => {
+          deleteTicket(id);
+        },
+      },
+    ]);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Gerenciamento de Tickets</Text>
       <View style={styles.filterContainer}>
         <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filter === "used" && styles.activeButton,
-          ]}
+          style={[styles.filterButton, filter === "used" && styles.activeButton]}
           onPress={() => setFilter("used")}
         >
           <Text style={styles.buttonText}>Usados</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filter === "unused" && styles.activeButton,
-          ]}
+          style={[styles.filterButton, filter === "unused" && styles.activeButton]}
           onPress={() => setFilter("unused")}
         >
           <Text style={styles.buttonText}>Não Usados</Text>
         </TouchableOpacity>
       </View>
+
       <FlatList
         data={filteredTickets}
         renderItem={renderItem}
@@ -159,6 +182,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#4caf50",
   },
   buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+
+  deleteButton: {
+    marginTop: 10,
+    backgroundColor: "#f44336",
+    paddingVertical: 8,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+
+  deleteButtonText: {
     color: "#fff",
     fontWeight: "bold",
   },

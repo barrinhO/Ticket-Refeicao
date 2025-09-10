@@ -1,19 +1,11 @@
-import {
-  View,
-  Text,
-  TouchableOpSacity,
-  TextInput,
-  StyleSheet,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert } from "react-native";
 import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const randomCode = () => {
   const randomNumbers = Math.floor(Math.random() * 90 + 10);
   const specialChars = ["#", "@", "$", "&", "*", "!"];
-  const randomSpecialChar =
-    specialChars[Math.floor(Math.random() * specialChars.length)];
+  const randomSpecialChar = specialChars[Math.floor(Math.random() * specialChars.length)];
   const randomLetter = String.fromCharCode(Math.floor(Math.random() * 26) + 65);
 
   return `${randomNumbers}${randomSpecialChar}${randomLetter}`;
@@ -22,17 +14,36 @@ const randomCode = () => {
 export default function CadastroAluno() {
   const [nome, setNome] = useState("");
 
-  const handleCadastro = () => {
+  const handleCadastro = async () => {
     if (nome.trim() === "") {
       Alert.alert("Erro", "Por favor, digite o nome do aluno.");
       return;
     }
-    Alert.alert(
-      "Sucesso",
-      `Aluno(a) ${nome} cadastrado(a)!\n\nCódigo: ${randomCode()}`
-    );
 
-    setNome("");
+    const novoAluno = {
+      id: Date.now().toString(),
+      name: nome,
+      code: randomCode(),
+      used: false,
+      date: null,
+      time: null,
+    };
+
+    try {
+      const storedData = await AsyncStorage.getItem("alunos");
+      const alunos = storedData ? JSON.parse(storedData) : [];
+
+      alunos.push(novoAluno);
+
+      await AsyncStorage.setItem("alunos", JSON.stringify(alunos));
+
+      Alert.alert("Sucesso", `Aluno(a) ${nome} cadastrado(a) com o código "${randomCode()}"`);
+
+      setNome("");
+    } catch (error) {
+      console.log("Erro ao salvar aluno:", error);
+      Alert.alert("Erro", "Não foi possível cadastrar o aluno.");
+    }
   };
 
   return (
