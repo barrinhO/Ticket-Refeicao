@@ -33,7 +33,7 @@ export default function LoginAdmin() {
 
       <TextInput
         style={styles.input}
-        placeholder="E-mail"
+        placeholder="Usuário"
         placeholderTextColor="#999"
         keyboardType="email-address"
         autoCapitalize="none"
