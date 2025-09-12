@@ -1,56 +1,27 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+// AdmScreen.js
+import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Ionicons } from "@expo/vector-icons";
 
-export default function AdmScreen({ navigation }) {
+import CadastroAluno from "./CadastroAlunoScreen";
+import TicketsUsados from "./ViewTicket";
+
+const Tab = createBottomTabNavigator();
+
+export default function AdmScreen() {
   return (
-    <View style={styles.container}>
-      {/* botões */}
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("CadastrarAluno")}
-      >
-        <Text style={styles.buttonText}>Cadastrar alunos</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("ViewTicket")}
-      >
-        <Text style={styles.buttonText}>Visualizar tickets utilizados</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Resetar</Text>
-      </TouchableOpacity>
-    </View>
+    <Tab.Navigator
+      initialRouteName="Cadastrar"
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ color, size }) => {
+          let iconName;
+          if (route.name === "Cadastrar") iconName = "person-add";
+          if (route.name === "Tickets") iconName = "ticket";
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: "#3D8BFF",
+        tabBarInactiveTintColor: "gray",
+      })}
+    ></Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f4f4f4",
-    padding: 20,
-  },
-  button: {
-    backgroundColor: "#4A90E2",
-    paddingVertical: 14,
-    paddingHorizontal: 25,
-    borderRadius: 10,
-    marginVertical: 10,
-    width: "100%",
-    alignItems: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-  },
-  buttonText: {
-    fontSize: 18,
-    color: "#fff",
-    fontWeight: "bold",
-  },
-});
