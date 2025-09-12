@@ -230,7 +230,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  statusTextPendente: { fontSize: 18, fontWeight: "bold", color: "#E74C3C" },
+  statusTextPendente: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#E74C3C",
+    textAlign: "center",
+  },
   statusTextDisponivel: { fontSize: 18, fontWeight: "bold", color: "#014f03" },
   statusTextUsado: { fontSize: 18, fontWeight: "bold", color: "#95A5A6" },
   actionSection: {
@@ -251,6 +256,7 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 16,
     fontWeight: "500",
+    textAlign: "center",
   },
   locationTextSuccess: {
     color: "#155724",
