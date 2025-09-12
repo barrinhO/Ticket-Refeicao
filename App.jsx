@@ -4,12 +4,12 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
 
 import AdmScreen from "./screens/AdmScreen";
-import ReceiveTicket from "./screens/ReceiveTicket";
 import LoginScreen from "./screens/LoginScreen";
 import LoginAlunoScreen from "./screens/LoginAlunoScreen";
 import LoginAdminScreen from "./screens/LoginAdmScreen";
 import CadastroAluno from "./screens/CadastroAlunoScreen";
 import TicketsUsados from "./screens/ViewTicket";
+import TelaRecebimentoTicket from "./screens/TelaRecebimentoTicket";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -26,22 +26,13 @@ function DrawerNavigator() {
           ),
         }}
       />
-      <Drawer.Screen
-        name="Receber Ticket"
-        component={ReceiveTicket}
-        options={{
-          drawerIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
-        }}
-      />
     </Drawer.Navigator>
   );
 }
 
 function StackNavigator() {
   return (
-    <Stack.Navigator initialRouteName="Home">
+    <Stack.Navigator initialRouteName="Login">
       <Stack.Screen
         name="Login"
         component={LoginScreen}
@@ -72,6 +63,12 @@ function StackNavigator() {
       <Stack.Screen
         name="CadastrarAluno"
         component={CadastroAluno}
+        options={{ headerShown: true, headerTitle: "" }}
+      />
+
+      <Stack.Screen
+        name="ReceberTicket"
+        component={TelaRecebimentoTicket}
         options={{ headerShown: true, headerTitle: "" }}
       />
 

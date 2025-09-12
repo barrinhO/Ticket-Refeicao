@@ -20,10 +20,12 @@ export default function CadastroAluno() {
       return;
     }
 
+    const codigoGerado = randomCode();
+
     const novoAluno = {
       id: Date.now().toString(),
       name: nome,
-      code: randomCode(),
+      code: codigoGerado,
       used: false,
       date: null,
       time: null,
@@ -37,7 +39,7 @@ export default function CadastroAluno() {
 
       await AsyncStorage.setItem("alunos", JSON.stringify(alunos));
 
-      Alert.alert("Sucesso", `Aluno(a) ${nome} cadastrado(a) com o código "${randomCode()}"`);
+      Alert.alert("Sucesso", `Aluno(a) ${nome} cadastrado(a) com o código "${codigoGerado}"`);
 
       setNome("");
     } catch (error) {

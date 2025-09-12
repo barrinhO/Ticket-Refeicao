@@ -1,16 +1,33 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function LoginAluno() {
+export default function LoginAluno({ navigation }) {
   const [codigo, setCodigo] = useState("");
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (codigo.trim() === "") {
-      Alert.alert("Erro", "Por favor, preencha todos os campos.");
+      Alert.alert("Erro", "Por favor, preencha o código.");
       return;
     }
 
-    Alert.alert("Sucesso", `Bem-vindo`);
+    try {
+      // Pega todos os alunos salvos
+      const storedData = await AsyncStorage.getItem("alunos");
+      const alunos = storedData ? JSON.parse(storedData) : [];
+
+      // Procura um aluno com o código digitado
+      const alunoEncontrado = alunos.find((aluno) => aluno.code === codigo);
+
+      if (alunoEncontrado) {
+        Alert.alert("Sucesso", `Bem-vindo(a), ${alunoEncontrado.name}!`);
+        navigation.navigate("ReceberTicket", { aluno: alunoEncontrado });
+      } else {
+        Alert.alert("Erro", "Código inválido.");
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Ocorreu um erro ao acessar os dados.");
+    }
   };
 
   return (
@@ -21,10 +38,8 @@ export default function LoginAluno() {
         style={styles.input}
         placeholder="Código"
         placeholderTextColor="#999"
-        secureTextEntry
         value={codigo}
         onChangeText={setCodigo}
-        maxLength={4}
       />
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>

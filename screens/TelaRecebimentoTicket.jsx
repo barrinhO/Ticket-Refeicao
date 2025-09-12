@@ -47,12 +47,11 @@ function isWithinTicketTime(date) {
   return now >= start && now <= end;
 }
 
-const TelaRecebimentoTicket = () => {
+const TelaRecebimentoTicket = ({ route }) => {
+  const { aluno } = route.params;
   const [ticketStatus, setTicketStatus] = useState("nao_recebido");
   const [isLocationVerified, setIsLocationVerified] = useState(false);
-  const [locationMessage, setLocationMessage] = useState(
-    "Verificando sua localização..."
-  );
+  const [locationMessage, setLocationMessage] = useState("Verificando sua localização...");
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -91,18 +90,14 @@ const TelaRecebimentoTicket = () => {
               setLocationMessage("Você está na cantina!");
             } else {
               setIsLocationVerified(false);
-              setLocationMessage(
-                `Você não está na cantina. Aproxime-se para resgatar.`
-              );
+              setLocationMessage(`Você não está na cantina. Aproxime-se para resgatar.`);
             }
             setIsLoadingLocation(false);
-          }
+          },
         );
       } catch (error) {
         setIsLocationVerified(false);
-        setLocationMessage(
-          "Não foi possível obter a localização. Verifique seu GPS."
-        );
+        setLocationMessage("Não foi possível obter a localização. Verifique seu GPS.");
         setIsLoadingLocation(false);
       }
     };
@@ -126,20 +121,12 @@ const TelaRecebimentoTicket = () => {
   const renderTicketStatus = () => {
     switch (ticketStatus) {
       case "disponivel":
-        return (
-          <Text style={styles.statusTextDisponivel}>
-            Status: Ticket Resgatado! ✅
-          </Text>
-        );
+        return <Text style={styles.statusTextDisponivel}>Status: Ticket Resgatado! ✅</Text>;
       case "usado":
-        return (
-          <Text style={styles.statusTextUsado}>Status: Ticket Utilizado</Text>
-        );
+        return <Text style={styles.statusTextUsado}>Status: Ticket Utilizado</Text>;
       default:
         return (
-          <Text style={styles.statusTextPendente}>
-            Status: Nenhum ticket recebido hoje
-          </Text>
+          <Text style={styles.statusTextPendente}>Status: Nenhum ticket recebido hoje</Text>
         );
     }
   };
@@ -147,10 +134,10 @@ const TelaRecebimentoTicket = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.clockText}>
-          {currentTime.toLocaleTimeString("pt-BR")}
+        <Text style={styles.clockText}>{currentTime.toLocaleTimeString("pt-BR")}</Text>
+        <Text style={styles.alunoInfoText}>
+          {aluno.name} | {aluno.code}
         </Text>
-        <Text style={styles.alunoInfoText}>João Vitor | 43#Q</Text>
       </View>
 
       <View style={styles.statusBox}>{renderTicketStatus()}</View>
@@ -164,9 +151,7 @@ const TelaRecebimentoTicket = () => {
               <Text
                 style={[
                   styles.locationText,
-                  isLocationVerified
-                    ? styles.locationTextSuccess
-                    : styles.locationTextError,
+                  isLocationVerified ? styles.locationTextSuccess : styles.locationTextError,
                 ]}
               >
                 {isLocationVerified ? "📍 " : "🚫 "}
@@ -179,25 +164,19 @@ const TelaRecebimentoTicket = () => {
         {isLocationVerified &&
           ticketStatus === "nao_recebido" &&
           isWithinTicketTime(currentTime) && (
-            <TouchableOpacity
-              style={styles.ticketButton}
-              onPress={handleReceiveTicket}
-            >
+            <TouchableOpacity style={styles.ticketButton} onPress={handleReceiveTicket}>
               <Text style={styles.buttonText}>Resgatar Ticket</Text>
             </TouchableOpacity>
           )}
 
-        {!isWithinTicketTime(currentTime) &&
-          ticketStatus === "nao_recebido" && (
-            <Text style={styles.infoText}>
-              O ticket só pode ser resgatado entre 14:55 e 15:05.
-            </Text>
-          )}
+        {!isWithinTicketTime(currentTime) && ticketStatus === "nao_recebido" && (
+          <Text style={styles.infoText}>
+            O ticket só pode ser resgatado entre 14:55 e 15:05.
+          </Text>
+        )}
 
         {ticketStatus !== "nao_recebido" && (
-          <Text style={styles.infoText}>
-            Você já pegou seu ticket hoje. Volte amanhã!
-          </Text>
+          <Text style={styles.infoText}>Você já pegou seu ticket hoje. Volte amanhã!</Text>
         )}
       </View>
     </View>
