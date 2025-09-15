@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import * as Location from "expo-location";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CANTINA_COORDS = {
   latitude: -27.618306,
@@ -17,7 +18,7 @@ const MAX_DISTANCE_METERS = 50;
 
 const TICKET_START_HOUR = 14;
 const TICKET_START_MINUTE = 55;
-const TICKET_END_HOUR = 15;
+const TICKET_END_HOUR = 22;
 const TICKET_END_MINUTE = 5;
 
 function haversineDistance(coords1, coords2) {
@@ -56,6 +57,30 @@ const TelaRecebimentoTicket = ({ route }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
+    const loadTicketStatus = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem("alunos");
+        if (!storedData) return;
+
+        const alunos = JSON.parse(storedData);
+        const alunoData = alunos.find((a) => a.id === aluno.id);
+
+        const today = new Date().toLocaleDateString("pt-BR");
+
+        if (alunoData && alunoData.used && alunoData.date === today) {
+          setTicketStatus("disponivel"); // já pegou hoje
+        } else {
+          setTicketStatus("nao_recebido"); // novo dia ou nunca pegou
+        }
+      } catch (error) {
+        console.log("Erro ao carregar status do aluno:", error);
+      }
+    };
+
+    loadTicketStatus();
+  }, [aluno.id]);
+
+  useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
@@ -90,7 +115,7 @@ const TelaRecebimentoTicket = ({ route }) => {
               setLocationMessage("Você está na cantina!");
             } else {
               setIsLocationVerified(false);
-              setLocationMessage(`Você não está na cantina. Aproxime-se para resgatar.`);
+              setLocationMessage("Você não está na cantina. Aproxime-se para resgatar.");
             }
             setIsLoadingLocation(false);
           },
@@ -111,10 +136,35 @@ const TelaRecebimentoTicket = ({ route }) => {
     };
   }, []);
 
-  const handleReceiveTicket = () => {
-    if (ticketStatus === "nao_recebido") {
-      setTicketStatus("disponivel");
-      Alert.alert("Sucesso!", "Seu ticket de refeição está disponível.");
+  const handleReceiveTicket = async () => {
+    if (ticketStatus !== "nao_recebido") {
+      Alert.alert("Aviso", "Você já pegou seu ticket hoje!");
+      return;
+    }
+
+    const now = new Date();
+    const date = now.toLocaleDateString("pt-BR");
+    const time = now.toLocaleTimeString("pt-BR");
+
+    setTicketStatus("disponivel");
+    Alert.alert("Sucesso!", "Seu ticket de refeição foi resgatado.");
+
+    try {
+      const storedData = await AsyncStorage.getItem("alunos");
+      let alunos = storedData ? JSON.parse(storedData) : [];
+
+      const updatedAlunos = alunos.map((a) =>
+        a.id === aluno.id ? { ...a, used: true, date, time } : a,
+      );
+
+      const alunoExists = updatedAlunos.find((a) => a.id === aluno.id);
+      if (!alunoExists) {
+        updatedAlunos.push({ ...aluno, used: true, date, time });
+      }
+
+      await AsyncStorage.setItem("alunos", JSON.stringify(updatedAlunos));
+    } catch (error) {
+      console.log("Erro ao salvar ticket:", error);
     }
   };
 
