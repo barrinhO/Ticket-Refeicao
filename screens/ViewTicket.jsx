@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: "#333333ff",
     textAlign: "center",
     marginTop: 20,
     marginBottom: 10,
