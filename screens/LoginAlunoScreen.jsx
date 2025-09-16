@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginAluno({ navigation }) {
@@ -12,11 +19,9 @@ export default function LoginAluno({ navigation }) {
     }
 
     try {
-      // Pega todos os alunos salvos
       const storedData = await AsyncStorage.getItem("alunos");
       const alunos = storedData ? JSON.parse(storedData) : [];
 
-      // Procura um aluno com o código digitado
       const alunoEncontrado = alunos.find((aluno) => aluno.code === codigo);
 
       if (alunoEncontrado) {

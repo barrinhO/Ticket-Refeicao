@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useIsFocused } from "@react-navigation/native";
 import {
   StyleSheet,
   Text,
@@ -13,6 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const UsedTicketsScreen = () => {
   const [allTickets, setAllTickets] = useState([]);
   const [filter, setFilter] = useState("used");
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     const loadTickets = async () => {
@@ -20,22 +22,28 @@ const UsedTicketsScreen = () => {
         const storedData = await AsyncStorage.getItem("alunos");
         if (storedData) {
           setAllTickets(JSON.parse(storedData));
+        } else {
+          setAllTickets([]);
         }
       } catch (error) {
         console.log("Erro ao carregar alunos:", error);
       }
     };
-
-    loadTickets();
-  }, []);
+    if (isFocused) {
+      loadTickets();
+    }
+  }, [isFocused]);
 
   const filteredTickets = allTickets.filter((ticket) =>
-    filter === "used" ? ticket.used : !ticket.used,
+    filter === "used" ? ticket.used : !ticket.used
   );
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <Text style={styles.name}>{item.name}</Text>
+      <Text style={styles.name}>
+        {item.name}
+        {item.code ? ` | ${item.code}` : ""}
+      </Text>
       {item.used ? (
         <Text style={styles.ticketInfoUsed}>Ticket resgatado</Text>
       ) : (
@@ -43,11 +51,15 @@ const UsedTicketsScreen = () => {
       )}
       {item.used && (
         <Text style={styles.dateInfo}>
-          <Text style={styles.label}>Resgatado em:</Text> {item.date} {item.time}
+          <Text style={styles.label}>Resgatado em:</Text> {item.date}{" "}
+          {item.time}
         </Text>
       )}
 
-      <TouchableOpacity style={styles.deleteButton} onPress={() => confirmarExclusao(item.id)}>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => confirmarExclusao(item.id)}
+      >
         <Text style={styles.deleteButtonText}>Excluir</Text>
       </TouchableOpacity>
     </View>
@@ -87,13 +99,19 @@ const UsedTicketsScreen = () => {
       <Text style={styles.header}>Gerenciamento de Tickets</Text>
       <View style={styles.filterContainer}>
         <TouchableOpacity
-          style={[styles.filterButton, filter === "used" && styles.activeButton]}
+          style={[
+            styles.filterButton,
+            filter === "used" && styles.activeButton,
+          ]}
           onPress={() => setFilter("used")}
         >
           <Text style={styles.buttonText}>Usados</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.filterButton, filter === "unused" && styles.activeButton]}
+          style={[
+            styles.filterButton,
+            filter === "unused" && styles.activeButton,
+          ]}
           onPress={() => setFilter("unused")}
         >
           <Text style={styles.buttonText}>Não Usados</Text>
