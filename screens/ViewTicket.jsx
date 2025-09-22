@@ -10,6 +10,8 @@ import {
   Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Clipboard from "expo-clipboard"; // Importa a biblioteca de clipboard
+import { Ionicons } from "@expo/vector-icons"; // Importa os ícones
 
 const UsedTicketsScreen = () => {
   const [allTickets, setAllTickets] = useState([]);
@@ -34,16 +36,43 @@ const UsedTicketsScreen = () => {
     }
   }, [isFocused]);
 
+  // Função para copiar um texto para a área de transferência
+  const copyToClipboard = async (text) => {
+    if (!text) return; // Não faz nada se não houver código
+    await Clipboard.setStringAsync(text);
+    Alert.alert(
+      "Copiado!",
+      "O código foi copiado para a área de transferência."
+    );
+  };
+
   const filteredTickets = allTickets.filter((ticket) =>
     filter === "used" ? ticket.used : !ticket.used
   );
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <Text style={styles.name}>
-        {item.name}
-        {item.code ? ` | ${item.code}` : ""}
-      </Text>
+      {/* Container para o nome e o ícone de cópia */}
+      <View style={styles.nameContainer}>
+        {/* Envolvemos o texto em um TouchableOpacity para torná-lo clicável */}
+        <TouchableOpacity onPress={() => copyToClipboard(item.code)}>
+          <Text style={styles.name}>
+            {item.name}
+            {item.code ? ` | ${item.code}` : ""}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Mostra o ícone de cópia apenas se houver um código */}
+        {item.code && (
+          <TouchableOpacity
+            style={styles.copyButton}
+            onPress={() => copyToClipboard(item.code)}
+          >
+            <Ionicons name="copy-outline" size={22} color="#4caf50" />
+          </TouchableOpacity>
+        )}
+      </View>
+
       {item.used ? (
         <Text style={styles.ticketInfoUsed}>Ticket resgatado</Text>
       ) : (
@@ -67,15 +96,8 @@ const UsedTicketsScreen = () => {
 
   const deleteTicket = async (id) => {
     try {
-      const storedData = await AsyncStorage.getItem("alunos");
-      if (!storedData) return;
-
-      let alunos = JSON.parse(storedData);
-
-      const updatedAlunos = alunos.filter((aluno) => aluno.id !== id);
-
+      const updatedAlunos = allTickets.filter((aluno) => aluno.id !== id);
       await AsyncStorage.setItem("alunos", JSON.stringify(updatedAlunos));
-
       setAllTickets(updatedAlunos);
     } catch (error) {
       console.log("Erro ao excluir aluno:", error);
@@ -87,9 +109,7 @@ const UsedTicketsScreen = () => {
       { text: "Não", style: "cancel" },
       {
         text: "Sim",
-        onPress: () => {
-          deleteTicket(id);
-        },
+        onPress: () => deleteTicket(id),
       },
     ]);
   };
@@ -158,10 +178,20 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  nameContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
+  },
   name: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
+    flexShrink: 1, // Garante que o texto não empurre o ícone para fora da tela
+  },
+  copyButton: {
+    paddingLeft: 10,
   },
   ticketInfoUsed: {
     color: "#4caf50",
@@ -203,7 +233,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
-
   deleteButton: {
     marginTop: 10,
     backgroundColor: "#f44336",
@@ -211,7 +240,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
   },
-
   deleteButtonText: {
     color: "#fff",
     fontWeight: "bold",

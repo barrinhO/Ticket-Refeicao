@@ -14,12 +14,12 @@ const CANTINA_COORDS = {
   latitude: -27.618306,
   longitude: -48.662846,
 };
-const MAX_DISTANCE_METERS = 50;
+const MAX_DISTANCE_METERS = 100;
 
 const TICKET_START_HOUR = 14;
 const TICKET_START_MINUTE = 55;
-const TICKET_END_HOUR = 22;
-const TICKET_END_MINUTE = 5;
+const TICKET_END_HOUR = 15;
+const TICKET_END_MINUTE = 15;
 
 function haversineDistance(coords1, coords2) {
   const toRad = (x) => (x * Math.PI) / 180;
@@ -243,7 +243,7 @@ const TelaRecebimentoTicket = ({ route }) => {
         {!isWithinTicketTime(currentTime) &&
           ticketStatus === "nao_recebido" && (
             <Text style={styles.infoText}>
-              O ticket só pode ser resgatado entre 14:55 e 15:05.
+              O ticket só pode ser resgatado entre 14:55 e 15:15.
             </Text>
           )}
 
