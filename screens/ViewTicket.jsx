@@ -66,10 +66,7 @@ const UsedTicketsScreen = () => {
     // Adiciona um "ouvinte" para mudanças no estado do app
     const subscription = AppState.addEventListener("change", (nextAppState) => {
       // Se o app estava inativo/background e agora ficou ativo
-      if (
-        appState.current.match(/inactive|background/) &&
-        nextAppState === "active"
-      ) {
+      if (appState.current.match(/inactive|background/) && nextAppState === "active") {
         console.log("App voltou para o primeiro plano, verificando tickets...");
         loadAndResetTickets();
       }
@@ -89,14 +86,11 @@ const UsedTicketsScreen = () => {
   const copyToClipboard = async (text) => {
     if (!text) return;
     await Clipboard.setStringAsync(text);
-    Alert.alert(
-      "Copiado!",
-      "O código foi copiado para a área de transferência."
-    );
+    Alert.alert("Copiado!", "O código foi copiado para a área de transferência.");
   };
 
   const filteredTickets = allTickets.filter((ticket) =>
-    filter === "used" ? ticket.used : !ticket.used
+    filter === "used" ? ticket.used : !ticket.used,
   );
 
   const renderItem = ({ item }) => (
@@ -129,15 +123,11 @@ const UsedTicketsScreen = () => {
       )}
       {item.used && (
         <Text style={styles.dateInfo}>
-          <Text style={styles.label}>Resgatado em:</Text> {item.date}{" "}
-          {item.time}
+          <Text style={styles.label}>Resgatado em:</Text> {item.date} {item.time}
         </Text>
       )}
 
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => confirmarExclusao(item.id)}
-      >
+      <TouchableOpacity style={styles.deleteButton} onPress={() => confirmarExclusao(item.id)}>
         <Text style={styles.deleteButtonText}>Excluir</Text>
       </TouchableOpacity>
     </View>
@@ -165,12 +155,7 @@ const UsedTicketsScreen = () => {
 
   if (isLoading) {
     return (
-      <View
-        style={[
-          styles.container,
-          { justifyContent: "center", alignItems: "center" },
-        ]}
-      >
+      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
         <ActivityIndicator size="large" color="#4caf50" />
         <Text style={{ marginTop: 10, fontSize: 16, color: "#555" }}>
           Carregando e atualizando tickets...
@@ -184,19 +169,13 @@ const UsedTicketsScreen = () => {
       <Text style={styles.header}>Gerenciamento de Tickets</Text>
       <View style={styles.filterContainer}>
         <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filter === "used" && styles.activeButton,
-          ]}
+          style={[styles.filterButton, filter === "used" && styles.activeButton]}
           onPress={() => setFilter("used")}
         >
           <Text style={styles.buttonText}>Usados</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filter === "unused" && styles.activeButton,
-          ]}
+          style={[styles.filterButton, filter === "unused" && styles.activeButton]}
           onPress={() => setFilter("unused")}
         >
           <Text style={styles.buttonText}>Não Usados</Text>
@@ -208,9 +187,7 @@ const UsedTicketsScreen = () => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>Nenhum ticket encontrado.</Text>
-        }
+        ListEmptyComponent={<Text style={styles.emptyText}>Nenhum ticket encontrado.</Text>}
       />
     </SafeAreaView>
   );
@@ -227,7 +204,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333333ff",
     textAlign: "center",
-    marginTop: 20,
+    marginTop: 80,
     marginBottom: 10,
   },
   listContent: {

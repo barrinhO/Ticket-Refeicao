@@ -16,10 +16,10 @@ const CANTINA_COORDS = {
   latitude: -27.618306,
   longitude: -48.662846,
 };
-const MAX_DISTANCE_METERS = 100;
+const MAX_DISTANCE_METERS = 200;
 const TICKET_START_HOUR = 14;
 const TICKET_START_MINUTE = 55;
-const TICKET_END_HOUR = 15;
+const TICKET_END_HOUR = 22;
 const TICKET_END_MINUTE = 15;
 
 function haversineDistance(coords1, coords2) {
@@ -49,9 +49,7 @@ const TelaRecebimentoTicket = ({ route }) => {
   const { aluno } = route.params;
   const [ticketStatus, setTicketStatus] = useState("carregando");
   const [isLocationVerified, setIsLocationVerified] = useState(false);
-  const [locationMessage, setLocationMessage] = useState(
-    "Verificando sua localização..."
-  );
+  const [locationMessage, setLocationMessage] = useState("Verificando sua localização...");
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -121,18 +119,14 @@ const TelaRecebimentoTicket = ({ route }) => {
               setLocationMessage("Você está na cantina!");
             } else {
               setIsLocationVerified(false);
-              setLocationMessage(
-                "Você não está na cantina. Aproxime-se para resgatar."
-              );
+              setLocationMessage("Você não está na cantina. Aproxime-se para resgatar.");
             }
             setIsLoadingLocation(false);
-          }
+          },
         );
       } catch (error) {
         setIsLocationVerified(false);
-        setLocationMessage(
-          "Não foi possível obter a localização. Verifique seu GPS."
-        );
+        setLocationMessage("Não foi possível obter a localização. Verifique seu GPS.");
         setIsLoadingLocation(false);
       }
     };
@@ -156,7 +150,7 @@ const TelaRecebimentoTicket = ({ route }) => {
       let alunos = storedData ? JSON.parse(storedData) : [];
 
       const updatedAlunos = alunos.map((a) =>
-        a.id === aluno.id ? { ...a, used: true, date, time } : a
+        a.id === aluno.id ? { ...a, used: true, date, time } : a,
       );
 
       await AsyncStorage.setItem("alunos", JSON.stringify(updatedAlunos));
@@ -172,22 +166,14 @@ const TelaRecebimentoTicket = ({ route }) => {
   const renderTicketStatus = () => {
     switch (ticketStatus) {
       case "disponivel":
-        return (
-          <Text style={styles.statusTextDisponivel}>
-            Status: Ticket Resgatado! ✅
-          </Text>
-        );
+        return <Text style={styles.statusTextDisponivel}>Status: Ticket Resgatado! ✅</Text>;
       case "usado":
-        return (
-          <Text style={styles.statusTextUsado}>Status: Ticket Utilizado</Text>
-        );
+        return <Text style={styles.statusTextUsado}>Status: Ticket Utilizado</Text>;
       case "carregando":
         return <ActivityIndicator size="large" color="#014f03" />;
       default:
         return (
-          <Text style={styles.statusTextPendente}>
-            Status: Nenhum ticket recebido hoje
-          </Text>
+          <Text style={styles.statusTextPendente}>Status: Nenhum ticket recebido hoje</Text>
         );
     }
   };
@@ -195,9 +181,7 @@ const TelaRecebimentoTicket = ({ route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.clockText}>
-          {currentTime.toLocaleTimeString("pt-BR")}
-        </Text>
+        <Text style={styles.clockText}>{currentTime.toLocaleTimeString("pt-BR")}</Text>
         <Text style={styles.alunoInfoText}>
           {aluno.name} | {aluno.code}
         </Text>
@@ -214,9 +198,7 @@ const TelaRecebimentoTicket = ({ route }) => {
               <Text
                 style={[
                   styles.locationText,
-                  isLocationVerified
-                    ? styles.locationTextSuccess
-                    : styles.locationTextError,
+                  isLocationVerified ? styles.locationTextSuccess : styles.locationTextError,
                 ]}
               >
                 {isLocationVerified ? "📍 " : "🚫 "}
@@ -229,25 +211,19 @@ const TelaRecebimentoTicket = ({ route }) => {
         {isLocationVerified &&
           ticketStatus === "nao_recebido" &&
           isWithinTicketTime(currentTime) && (
-            <TouchableOpacity
-              style={styles.ticketButton}
-              onPress={handleReceiveTicket}
-            >
+            <TouchableOpacity style={styles.ticketButton} onPress={handleReceiveTicket}>
               <Text style={styles.buttonText}>Resgatar Ticket</Text>
             </TouchableOpacity>
           )}
 
-        {!isWithinTicketTime(currentTime) &&
-          ticketStatus === "nao_recebido" && (
-            <Text style={styles.infoText}>
-              O ticket só pode ser resgatado entre 14:55 e 15:15.
-            </Text>
-          )}
+        {!isWithinTicketTime(currentTime) && ticketStatus === "nao_recebido" && (
+          <Text style={styles.infoText}>
+            O ticket só pode ser resgatado entre 14:55 e 15:15.
+          </Text>
+        )}
 
         {ticketStatus === "disponivel" && (
-          <Text style={styles.infoText}>
-            Você já pegou seu ticket hoje. Volte amanhã!
-          </Text>
+          <Text style={styles.infoText}>Você já pegou seu ticket hoje. Volte amanhã!</Text>
         )}
       </View>
     </View>
