@@ -7,15 +7,16 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { useIsFocused } from "@react-navigation/native";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Suas constantes e funções auxiliares
 const CANTINA_COORDS = {
   latitude: -27.618306,
   longitude: -48.662846,
 };
 const MAX_DISTANCE_METERS = 100;
-
 const TICKET_START_HOUR = 14;
 const TICKET_START_MINUTE = 55;
 const TICKET_END_HOUR = 15;
@@ -24,18 +25,14 @@ const TICKET_END_MINUTE = 15;
 function haversineDistance(coords1, coords2) {
   const toRad = (x) => (x * Math.PI) / 180;
   const R = 6371e3;
-
   const dLat = toRad(coords2.latitude - coords1.latitude);
   const dLon = toRad(coords2.longitude - coords1.longitude);
   const lat1 = toRad(coords1.latitude);
   const lat2 = toRad(coords2.latitude);
-
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
-
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
   return R * c;
 }
 
@@ -50,7 +47,7 @@ function isWithinTicketTime(date) {
 
 const TelaRecebimentoTicket = ({ route }) => {
   const { aluno } = route.params;
-  const [ticketStatus, setTicketStatus] = useState("nao_recebido");
+  const [ticketStatus, setTicketStatus] = useState("carregando");
   const [isLocationVerified, setIsLocationVerified] = useState(false);
   const [locationMessage, setLocationMessage] = useState(
     "Verificando sua localização..."
@@ -58,15 +55,19 @@ const TelaRecebimentoTicket = ({ route }) => {
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  const isFocused = useIsFocused();
+
   useEffect(() => {
     const loadTicketStatus = async () => {
       try {
         const storedData = await AsyncStorage.getItem("alunos");
-        if (!storedData) return;
+        if (!storedData) {
+          setTicketStatus("nao_recebido");
+          return;
+        }
 
         const alunos = JSON.parse(storedData);
         const alunoData = alunos.find((a) => a.id === aluno.id);
-
         const today = new Date().toLocaleDateString("pt-BR");
 
         if (alunoData && alunoData.used && alunoData.date === today) {
@@ -76,11 +77,14 @@ const TelaRecebimentoTicket = ({ route }) => {
         }
       } catch (error) {
         console.log("Erro ao carregar status do aluno:", error);
+        setTicketStatus("nao_recebido");
       }
     };
 
-    loadTicketStatus();
-  }, [aluno.id]);
+    if (isFocused) {
+      loadTicketStatus();
+    }
+  }, [aluno.id, isFocused]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -143,17 +147,9 @@ const TelaRecebimentoTicket = ({ route }) => {
   }, []);
 
   const handleReceiveTicket = async () => {
-    if (ticketStatus !== "nao_recebido") {
-      Alert.alert("Aviso", "Você já pegou seu ticket hoje!");
-      return;
-    }
-
     const now = new Date();
     const date = now.toLocaleDateString("pt-BR");
     const time = now.toLocaleTimeString("pt-BR");
-
-    setTicketStatus("disponivel");
-    Alert.alert("Sucesso!", "Seu ticket de refeição foi resgatado.");
 
     try {
       const storedData = await AsyncStorage.getItem("alunos");
@@ -163,14 +159,13 @@ const TelaRecebimentoTicket = ({ route }) => {
         a.id === aluno.id ? { ...a, used: true, date, time } : a
       );
 
-      const alunoExists = updatedAlunos.find((a) => a.id === aluno.id);
-      if (!alunoExists) {
-        updatedAlunos.push({ ...aluno, used: true, date, time });
-      }
-
       await AsyncStorage.setItem("alunos", JSON.stringify(updatedAlunos));
+
+      setTicketStatus("disponivel");
+      Alert.alert("Sucesso!", "Seu ticket de refeição foi resgatado.");
     } catch (error) {
       console.log("Erro ao salvar ticket:", error);
+      Alert.alert("Erro", "Não foi possível salvar seu ticket.");
     }
   };
 
@@ -186,6 +181,8 @@ const TelaRecebimentoTicket = ({ route }) => {
         return (
           <Text style={styles.statusTextUsado}>Status: Ticket Utilizado</Text>
         );
+      case "carregando":
+        return <ActivityIndicator size="large" color="#014f03" />;
       default:
         return (
           <Text style={styles.statusTextPendente}>
@@ -247,7 +244,7 @@ const TelaRecebimentoTicket = ({ route }) => {
             </Text>
           )}
 
-        {ticketStatus !== "nao_recebido" && (
+        {ticketStatus === "disponivel" && (
           <Text style={styles.infoText}>
             Você já pegou seu ticket hoje. Volte amanhã!
           </Text>
@@ -297,6 +294,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 20,
     width: "90%",
+    minHeight: 70, // Garante que a caixa tenha um tamanho mínimo para o ActivityIndicator
+    justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },

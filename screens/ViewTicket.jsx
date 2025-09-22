@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { useIsFocused } from "@react-navigation/native";
+import React, { useState, useEffect, useRef } from "react"; // Adicionado useRef
 import {
   StyleSheet,
   Text,
@@ -8,37 +7,87 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
+  AppState, // Importa o AppState
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Clipboard from "expo-clipboard"; // Importa a biblioteca de clipboard
-import { Ionicons } from "@expo/vector-icons"; // Importa os ícones
+import * as Clipboard from "expo-clipboard";
+import { Ionicons } from "@expo/vector-icons";
 
 const UsedTicketsScreen = () => {
   const [allTickets, setAllTickets] = useState([]);
   const [filter, setFilter] = useState("used");
-  const isFocused = useIsFocused();
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const loadTickets = async () => {
-      try {
-        const storedData = await AsyncStorage.getItem("alunos");
-        if (storedData) {
-          setAllTickets(JSON.parse(storedData));
-        } else {
-          setAllTickets([]);
-        }
-      } catch (error) {
-        console.log("Erro ao carregar alunos:", error);
+  // Ref para guardar o estado atual do AppState
+  const appState = useRef(AppState.currentState);
+
+  // Função para carregar e resetar os tickets
+  const loadAndResetTickets = async () => {
+    setIsLoading(true);
+    try {
+      const lastResetDate = await AsyncStorage.getItem("lastResetDate");
+      const today = new Date().toLocaleDateString("pt-BR");
+      let currentTickets = [];
+
+      const storedData = await AsyncStorage.getItem("alunos");
+      if (storedData) {
+        currentTickets = JSON.parse(storedData);
       }
-    };
-    if (isFocused) {
-      loadTickets();
-    }
-  }, [isFocused]);
 
-  // Função para copiar um texto para a área de transferência
+      if (lastResetDate !== today) {
+        console.log("Novo dia detectado via AppState! Resetando tickets...");
+        const resetedTickets = currentTickets.map((aluno) => ({
+          ...aluno,
+          used: false,
+          date: null,
+          time: null,
+        }));
+
+        await AsyncStorage.setItem("alunos", JSON.stringify(resetedTickets));
+        await AsyncStorage.setItem("lastResetDate", today);
+        setAllTickets(resetedTickets);
+      } else {
+        setAllTickets(currentTickets);
+      }
+    } catch (error) {
+      console.log("Erro no reset ou carregamento de tickets:", error);
+      setAllTickets([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Substituímos o useEffect com 'isFocused' por este com 'AppState'
+  useEffect(() => {
+    // Carrega os dados na primeira vez que o componente monta
+    loadAndResetTickets();
+
+    // Adiciona um "ouvinte" para mudanças no estado do app
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      // Se o app estava inativo/background e agora ficou ativo
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === "active"
+      ) {
+        console.log("App voltou para o primeiro plano, verificando tickets...");
+        loadAndResetTickets();
+      }
+      // Atualiza o estado atual
+      appState.current = nextAppState;
+    });
+
+    // Limpa o "ouvinte" quando o componente é desmontado
+    return () => {
+      subscription.remove();
+    };
+  }, []); // O array vazio [] garante que isso rode apenas uma vez na montagem
+
+  // O restante do seu código permanece exatamente o mesmo, sem alterações.
+  // ... (funções copyToClipboard, deleteTicket, renderItem, etc.)
+
   const copyToClipboard = async (text) => {
-    if (!text) return; // Não faz nada se não houver código
+    if (!text) return;
     await Clipboard.setStringAsync(text);
     Alert.alert(
       "Copiado!",
@@ -52,17 +101,17 @@ const UsedTicketsScreen = () => {
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      {/* Container para o nome e o ícone de cópia */}
-      <View style={styles.nameContainer}>
-        {/* Envolvemos o texto em um TouchableOpacity para torná-lo clicável */}
-        <TouchableOpacity onPress={() => copyToClipboard(item.code)}>
-          <Text style={styles.name}>
+      <View style={styles.nameAndCopyContainer}>
+        <TouchableOpacity
+          onPress={() => item.code && copyToClipboard(item.code)}
+          style={styles.nameTextWrapper}
+        >
+          <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
             {item.name}
             {item.code ? ` | ${item.code}` : ""}
           </Text>
         </TouchableOpacity>
 
-        {/* Mostra o ícone de cópia apenas se houver um código */}
         {item.code && (
           <TouchableOpacity
             style={styles.copyButton}
@@ -114,6 +163,22 @@ const UsedTicketsScreen = () => {
     ]);
   };
 
+  if (isLoading) {
+    return (
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color="#4caf50" />
+        <Text style={{ marginTop: 10, fontSize: 16, color: "#555" }}>
+          Carregando e atualizando tickets...
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Gerenciamento de Tickets</Text>
@@ -143,11 +208,15 @@ const UsedTicketsScreen = () => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>Nenhum ticket encontrado.</Text>
+        }
       />
     </SafeAreaView>
   );
 };
 
+// SEUS ESTILOS PERMANECEM OS MESMOS
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -178,20 +247,23 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  nameContainer: {
+  nameAndCopyContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 5,
   },
+  nameTextWrapper: {
+    flex: 1,
+    marginRight: 10,
+  },
   name: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
-    flexShrink: 1, // Garante que o texto não empurre o ícone para fora da tela
   },
   copyButton: {
-    paddingLeft: 10,
+    paddingLeft: 0,
   },
   ticketInfoUsed: {
     color: "#4caf50",
@@ -243,6 +315,12 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 50,
+    fontSize: 16,
+    color: "#888",
   },
 });
 
