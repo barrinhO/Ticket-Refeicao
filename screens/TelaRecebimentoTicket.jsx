@@ -19,7 +19,7 @@ const CANTINA_COORDS = {
 const MAX_DISTANCE_METERS = 200;
 const TICKET_START_HOUR = 14;
 const TICKET_START_MINUTE = 55;
-const TICKET_END_HOUR = 22;
+const TICKET_END_HOUR = 15;
 const TICKET_END_MINUTE = 15;
 
 function haversineDistance(coords1, coords2) {
