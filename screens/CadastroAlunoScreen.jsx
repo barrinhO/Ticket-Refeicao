@@ -11,7 +11,7 @@ const randomCode = () => {
   return `${randomNumbers}${randomSpecialChar}${randomLetter}`;
 };
 
-export default function CadastroAluno() {
+export default function CadastroAluno({ navigation }) {
   const [nome, setNome] = useState("");
 
   const handleCadastro = async () => {
@@ -36,11 +36,9 @@ export default function CadastroAluno() {
       const alunos = storedData ? JSON.parse(storedData) : [];
 
       alunos.push(novoAluno);
-
       await AsyncStorage.setItem("alunos", JSON.stringify(alunos));
 
       Alert.alert("Sucesso", `Aluno(a) ${nome} cadastrado(a) com o código "${codigoGerado}"`);
-
       setNome("");
     } catch (error) {
       console.log("Erro ao salvar aluno:", error);
@@ -51,7 +49,6 @@ export default function CadastroAluno() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Cadastro de Aluno</Text>
-
       <TextInput
         style={styles.input}
         placeholder="Digite o nome do aluno"
@@ -59,7 +56,6 @@ export default function CadastroAluno() {
         value={nome}
         onChangeText={setNome}
       />
-
       <TouchableOpacity style={styles.button} onPress={handleCadastro}>
         <Text style={styles.buttonText}>Cadastrar e gerar código</Text>
       </TouchableOpacity>
@@ -75,12 +71,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 30,
-    color: "#333",
-  },
+  title: { fontSize: 28, fontWeight: "bold", marginBottom: 30, color: "#333" },
   input: {
     width: "100%",
     height: 50,
@@ -100,9 +91,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  buttonText: {
-    color: "#FFF",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+  buttonText: { color: "#FFF", fontSize: 18, fontWeight: "bold" },
 });

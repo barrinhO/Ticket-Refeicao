@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"; // Adicionado useRef
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,42 +8,35 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  AppState, // Importa o AppState
+  AppState,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Clipboard from "expo-clipboard";
 import { Ionicons } from "@expo/vector-icons";
 
-const UsedTicketsScreen = () => {
+export default function UsedTicketsScreen() {
   const [allTickets, setAllTickets] = useState([]);
   const [filter, setFilter] = useState("used");
   const [isLoading, setIsLoading] = useState(true);
-
-  // Ref para guardar o estado atual do AppState
   const appState = useRef(AppState.currentState);
 
-  // Função para carregar e resetar os tickets
+  // Carrega tickets do AsyncStorage e reseta se for novo dia
   const loadAndResetTickets = async () => {
     setIsLoading(true);
     try {
       const lastResetDate = await AsyncStorage.getItem("lastResetDate");
       const today = new Date().toLocaleDateString("pt-BR");
-      let currentTickets = [];
 
       const storedData = await AsyncStorage.getItem("alunos");
-      if (storedData) {
-        currentTickets = JSON.parse(storedData);
-      }
+      const currentTickets = storedData ? JSON.parse(storedData) : [];
 
       if (lastResetDate !== today) {
-        console.log("Novo dia detectado via AppState! Resetando tickets...");
         const resetedTickets = currentTickets.map((aluno) => ({
           ...aluno,
           used: false,
           date: null,
           time: null,
         }));
-
         await AsyncStorage.setItem("alunos", JSON.stringify(resetedTickets));
         await AsyncStorage.setItem("lastResetDate", today);
         setAllTickets(resetedTickets);
@@ -58,35 +51,42 @@ const UsedTicketsScreen = () => {
     }
   };
 
-  // Substituímos o useEffect com 'isFocused' por este com 'AppState'
   useEffect(() => {
-    // Carrega os dados na primeira vez que o componente monta
     loadAndResetTickets();
 
-    // Adiciona um "ouvinte" para mudanças no estado do app
     const subscription = AppState.addEventListener("change", (nextAppState) => {
-      // Se o app estava inativo/background e agora ficou ativo
       if (appState.current.match(/inactive|background/) && nextAppState === "active") {
-        console.log("App voltou para o primeiro plano, verificando tickets...");
         loadAndResetTickets();
       }
-      // Atualiza o estado atual
       appState.current = nextAppState;
     });
 
-    // Limpa o "ouvinte" quando o componente é desmontado
-    return () => {
-      subscription.remove();
-    };
-  }, []); // O array vazio [] garante que isso rode apenas uma vez na montagem
+    return () => subscription.remove();
+  }, []);
 
-  // O restante do seu código permanece exatamente o mesmo, sem alterações.
-  // ... (funções copyToClipboard, deleteTicket, renderItem, etc.)
-
+  // Copiar código para clipboard
   const copyToClipboard = async (text) => {
     if (!text) return;
     await Clipboard.setStringAsync(text);
     Alert.alert("Copiado!", "O código foi copiado para a área de transferência.");
+  };
+
+  // Excluir ticket
+  const deleteTicket = async (id) => {
+    try {
+      const updatedTickets = allTickets.filter((aluno) => aluno.id !== id);
+      await AsyncStorage.setItem("alunos", JSON.stringify(updatedTickets));
+      setAllTickets(updatedTickets);
+    } catch (error) {
+      console.log("Erro ao excluir aluno:", error);
+    }
+  };
+
+  const confirmarExclusao = (id) => {
+    Alert.alert("Excluir Ticket", "Deseja realmente excluir este ticket?", [
+      { text: "Não", style: "cancel" },
+      { text: "Sim", onPress: () => deleteTicket(id) },
+    ]);
   };
 
   const filteredTickets = allTickets.filter((ticket) =>
@@ -97,15 +97,13 @@ const UsedTicketsScreen = () => {
     <View style={styles.itemContainer}>
       <View style={styles.nameAndCopyContainer}>
         <TouchableOpacity
-          onPress={() => item.code && copyToClipboard(item.code)}
+          onPress={() => copyToClipboard(item.code)}
           style={styles.nameTextWrapper}
         >
           <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
-            {item.name}
-            {item.code ? ` | ${item.code}` : ""}
+            {item.name} {item.code ? `| ${item.code}` : ""}
           </Text>
         </TouchableOpacity>
-
         {item.code && (
           <TouchableOpacity
             style={styles.copyButton}
@@ -115,7 +113,6 @@ const UsedTicketsScreen = () => {
           </TouchableOpacity>
         )}
       </View>
-
       {item.used ? (
         <Text style={styles.ticketInfoUsed}>Ticket resgatado</Text>
       ) : (
@@ -126,32 +123,11 @@ const UsedTicketsScreen = () => {
           <Text style={styles.label}>Resgatado em:</Text> {item.date} {item.time}
         </Text>
       )}
-
       <TouchableOpacity style={styles.deleteButton} onPress={() => confirmarExclusao(item.id)}>
         <Text style={styles.deleteButtonText}>Excluir</Text>
       </TouchableOpacity>
     </View>
   );
-
-  const deleteTicket = async (id) => {
-    try {
-      const updatedAlunos = allTickets.filter((aluno) => aluno.id !== id);
-      await AsyncStorage.setItem("alunos", JSON.stringify(updatedAlunos));
-      setAllTickets(updatedAlunos);
-    } catch (error) {
-      console.log("Erro ao excluir aluno:", error);
-    }
-  };
-
-  const confirmarExclusao = (id) => {
-    Alert.alert("Excluir Ticket", "Deseja realmente excluir este ticket?", [
-      { text: "Não", style: "cancel" },
-      {
-        text: "Sim",
-        onPress: () => deleteTicket(id),
-      },
-    ]);
-  };
 
   if (isLoading) {
     return (
@@ -181,7 +157,6 @@ const UsedTicketsScreen = () => {
           <Text style={styles.buttonText}>Não Usados</Text>
         </TouchableOpacity>
       </View>
-
       <FlatList
         data={filteredTickets}
         renderItem={renderItem}
@@ -191,26 +166,19 @@ const UsedTicketsScreen = () => {
       />
     </SafeAreaView>
   );
-};
+}
 
-// SEUS ESTILOS PERMANECEM OS MESMOS
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f0f0f5",
-  },
+  container: { flex: 1, backgroundColor: "#f0f0f5" },
   header: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333333ff",
+    color: "#333",
     textAlign: "center",
-    marginTop: 80,
+    marginTop: 20,
     marginBottom: 10,
   },
-  listContent: {
-    paddingHorizontal: 15,
-    paddingBottom: 20,
-  },
+  listContent: { paddingHorizontal: 15, paddingBottom: 20 },
   itemContainer: {
     backgroundColor: "#fff",
     padding: 15,
@@ -230,44 +198,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 5,
   },
-  nameTextWrapper: {
-    flex: 1,
-    marginRight: 10,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  copyButton: {
-    paddingLeft: 0,
-  },
-  ticketInfoUsed: {
-    color: "#4caf50",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginTop: 5,
-  },
-  ticketInfoUnused: {
-    color: "#f44336",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginTop: 5,
-  },
-  dateInfo: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 5,
-  },
-  label: {
-    fontWeight: "bold",
-    color: "#333",
-  },
-  filterContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
+  nameTextWrapper: { flex: 1, marginRight: 10 },
+  name: { fontSize: 18, fontWeight: "bold", color: "#333" },
+  copyButton: { paddingLeft: 0 },
+  ticketInfoUsed: { color: "#4caf50", fontSize: 16, fontWeight: "bold", marginTop: 5 },
+  ticketInfoUnused: { color: "#f44336", fontSize: 16, fontWeight: "bold", marginTop: 5 },
+  dateInfo: { fontSize: 14, color: "#666", marginTop: 5 },
+  label: { fontWeight: "bold", color: "#333" },
+  filterContainer: { flexDirection: "row", justifyContent: "center", marginBottom: 20 },
   filterButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -275,13 +213,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#e0e0e0",
     marginHorizontal: 5,
   },
-  activeButton: {
-    backgroundColor: "#4caf50",
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  activeButton: { backgroundColor: "#4caf50" },
+  buttonText: { color: "#fff", fontWeight: "bold" },
   deleteButton: {
     marginTop: 10,
     backgroundColor: "#f44336",
@@ -289,16 +222,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
   },
-  deleteButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  emptyText: {
-    textAlign: "center",
-    marginTop: 50,
-    fontSize: 16,
-    color: "#888",
-  },
+  deleteButtonText: { color: "#fff", fontWeight: "bold" },
+  emptyText: { textAlign: "center", marginTop: 50, fontSize: 16, color: "#888" },
 });
-
-export default UsedTicketsScreen;

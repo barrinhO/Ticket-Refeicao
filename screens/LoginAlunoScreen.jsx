@@ -1,16 +1,12 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useDispatch } from "react-redux";
+import { loginAluno } from "../src/store/userSlice";
 
-export default function LoginAluno({ navigation }) {
+export default function LoginAlunoScreen({ navigation }) {
   const [codigo, setCodigo] = useState("");
+  const dispatch = useDispatch();
 
   const handleLogin = async () => {
     if (codigo.trim() === "") {
@@ -19,34 +15,33 @@ export default function LoginAluno({ navigation }) {
     }
 
     try {
-      const storedData = await AsyncStorage.getItem("alunos");
-      const alunos = storedData ? JSON.parse(storedData) : [];
+      const storedAlunos = await AsyncStorage.getItem("alunos");
+      const alunos = storedAlunos ? JSON.parse(storedAlunos) : [];
 
-      const alunoEncontrado = alunos.find((aluno) => aluno.code === codigo);
+      const aluno = alunos.find((al) => al.code === codigo); // <<< CORRETO: "code"
 
-      if (alunoEncontrado) {
-        Alert.alert("Sucesso", `Bem-vindo(a), ${alunoEncontrado.name}!`);
-        navigation.navigate("ReceberTicket", { aluno: alunoEncontrado });
+      if (aluno) {
+        dispatch(loginAluno(aluno));
+        navigation.navigate("ReceberTicket", { aluno });
       } else {
         Alert.alert("Erro", "Código inválido.");
       }
-    } catch (error) {
-      Alert.alert("Erro", "Ocorreu um erro ao acessar os dados.");
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Erro", "Falha ao tentar logar.");
     }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login do Aluno</Text>
-
       <TextInput
         style={styles.input}
-        placeholder="Código"
+        placeholder="Digite seu código"
         placeholderTextColor="#999"
         value={codigo}
         onChangeText={setCodigo}
       />
-
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
@@ -58,15 +53,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F4F4F4",
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 30,
-  },
+  title: { fontSize: 28, fontWeight: "bold", marginBottom: 30, color: "#333" },
   input: {
     width: "100%",
     height: 50,
@@ -76,18 +67,15 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderWidth: 1,
     borderColor: "#DDD",
+    fontSize: 16,
   },
   button: {
     width: "100%",
     height: 50,
     backgroundColor: "#3D8BFF",
     borderRadius: 8,
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
   },
-  buttonText: {
-    color: "#FFF",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+  buttonText: { color: "#FFF", fontSize: 18, fontWeight: "bold" },
 });
