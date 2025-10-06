@@ -11,7 +11,6 @@ import { useIsFocused } from "@react-navigation/native";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Suas constantes e funções auxiliares
 const CANTINA_COORDS = {
   latitude: -27.618306,
   longitude: -48.662846,
@@ -270,7 +269,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 20,
     width: "90%",
-    minHeight: 70, // Garante que a caixa tenha um tamanho mínimo para o ActivityIndicator
+    minHeight: 70,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",

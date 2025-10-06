@@ -18,7 +18,7 @@ export default function LoginAlunoScreen({ navigation }) {
       const storedAlunos = await AsyncStorage.getItem("alunos");
       const alunos = storedAlunos ? JSON.parse(storedAlunos) : [];
 
-      const aluno = alunos.find((al) => al.code === codigo); // <<< CORRETO: "code"
+      const aluno = alunos.find((al) => al.code === codigo);
 
       if (aluno) {
         dispatch(loginAluno(aluno));

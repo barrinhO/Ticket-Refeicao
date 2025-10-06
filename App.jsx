@@ -6,7 +6,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 
-// Importe suas telas
 import LoginScreen from "./screens/LoginScreen";
 import LoginAlunoScreen from "./screens/LoginAlunoScreen";
 import LoginAdminScreen from "./screens/LoginAdmScreen";
@@ -63,12 +62,12 @@ function StackNavigator() {
       <Stack.Screen
         name="LoginAluno"
         component={LoginAlunoScreen}
-        options={{ headerShown: true, headerTitle: "Selecionar Aluno" }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="LoginAdmin"
         component={LoginAdminScreen}
-        options={{ headerShown: true, headerTitle: "" }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="ReceberTicket"
@@ -80,7 +79,6 @@ function StackNavigator() {
   );
 }
 
-// ==== Envolvendo tudo com Redux Provider ====
 export default function App() {
   return (
     <Provider store={store}>

@@ -20,7 +20,6 @@ export default function UsedTicketsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const appState = useRef(AppState.currentState);
 
-  // Carrega tickets do AsyncStorage e reseta se for novo dia
   const loadAndResetTickets = async () => {
     setIsLoading(true);
     try {
@@ -64,14 +63,12 @@ export default function UsedTicketsScreen() {
     return () => subscription.remove();
   }, []);
 
-  // Copiar código para clipboard
   const copyToClipboard = async (text) => {
     if (!text) return;
     await Clipboard.setStringAsync(text);
     Alert.alert("Copiado!", "O código foi copiado para a área de transferência.");
   };
 
-  // Excluir ticket
   const deleteTicket = async (id) => {
     try {
       const updatedTickets = allTickets.filter((aluno) => aluno.id !== id);
